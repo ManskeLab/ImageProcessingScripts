@@ -8,10 +8,10 @@ import pandas as pd
 from vtk.util.numpy_support import vtk_to_numpy
 import sys, os
 from ConnectedComponentLabeling3D import findConnectedComponents
-from uniform_seg import Image, ImageBuilder, Scanner, Plane, Alg
+from uniform_seg import Image, ImageBuilder
 from uniform_seg import writeMapToDataFrameToCSVWithIndex, writeMapToDataFrameToCSV, mask_calc
 
-def getCubesAndWriteStats(image: Image, isResampled: bool=False):
+def getCubesAndWriteValues(image: Image, isResampled: bool=False):
   imageData = vtk_to_numpy(image.getImage().GetOutput().GetPointData().GetScalars()).reshape(
     image.getImage().GetOutput().GetDimensions(), order='F'
   )
@@ -67,22 +67,36 @@ def getProfileAndWriteValues(image: Image, isResampled: bool=False):
     writeMapToDataFrameToCSV(data, image.directory, "profile.csv")
  
 def main():
-  index = []
   directory = sys.argv[1] # of image
+
+  if (len(sys.argv) != 2):
+    print("Usage: python getComponents.py <directory>")
+    sys.exit(1)
+  directory = sys.argv[1]
 
   files = os.listdir(directory)
   if ("notes.txt" not in files):
     sys.exit(1)
 
-  imageFiles = list(filter(lambda x: x.endswith(".nii") and "resampled" not in x, files))
-  # imageFiles = list(filter(lambda x: x.endswith(".nii") and "resampled" in x, files))
+  isResampled = 'y'
+  print("Using resampled data? [y]/n")
+  isResampled = input()
+  if (isResampled == 'y' or isResampled == ""):
+    isResampled = True
+  elif (isResampled == 'n'):
+    isResampled = False
+  else:
+    sys.exit(1)
+
+  if (isResampled):
+    imageFiles = list(filter(lambda x: x.endswith(".nii") and "resampled" in x, files))
+  else:
+    imageFiles = list(filter(lambda x: x.endswith(".nii") and "resampled" not in x, files))
   imageFilename, segmentationFilename = (imageFiles[0], imageFiles[1]) if "seg" in imageFiles[1] else (imageFiles[1], imageFiles[0])
 
   image = ImageBuilder.createImage(imageFilename, segmentationFilename, directory)
-  getCubesAndWriteStats(image, isResampled=False)
-  getProfileAndWriteValues(image, isResampled=False)
-  # getCubesAndWriteStats(image, isResampled=True)
-  # getProfileAndWriteValues(image, isResampled=True)
+  getCubesAndWriteValues(image, isResampled=isResampled)
+  getProfileAndWriteValues(image, isResampled=isResampled)
 
 if __name__ == "__main__":
   main()

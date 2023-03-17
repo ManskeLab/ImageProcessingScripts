@@ -27,7 +27,7 @@ numEstimatedParameters = 2
 df = numCalibration - numEstimatedParameters
 
 attributeFile = "notes.txt"
-dualPlotFilename = "dualPlots.txt"
+dualPlotFilename = "dualPlotsResampled.txt"
 
 calibrationCoefficients = []
 calibrationPoints = []
@@ -340,45 +340,45 @@ def lineProfile(image: Image, directory: str) -> tuple:
     key = PlotKey.clinicalAxialPhantom
   elif (image.getScanner() == Scanner.WBCT and image.getPlane() == Plane.AXIAL and image.getPatient() == False and image.getAlg() == Alg.NEW):
     key = PlotKey.wbctAxialPhantom
-    # resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
-    # resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
-    # resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
-    # ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
-    # model = poly.polyfit(attenuation_x, bmd_y, 1)
-    # calibratedBMD = poly.polyval(attenuation_x, model)
-    # bmd_800_prof = model[0] + (prof_800 * model[1])
-    # bmd_800_limit = np.zeros_like(bmd_800_prof)
-    # bmd_800_limit[:] = 800
-    # bmd800TrueLimit = np.zeros_like(bmd_800_prof)
-    # bmd800TrueLimit[:] = calibratedBMD[2]
+    resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
+    resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
+    resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
+    ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
+    model = poly.polyfit(attenuation_x, bmd_y, 1)
+    calibratedBMD = poly.polyval(attenuation_x, model)
+    bmd_800_prof = model[0] + (prof_800 * model[1])
+    bmd_800_limit = np.zeros_like(bmd_800_prof)
+    bmd_800_limit[:] = 800
+    bmd800TrueLimit = np.zeros_like(bmd_800_prof)
+    bmd800TrueLimit[:] = calibratedBMD[2]
   elif (image.getScanner() == Scanner.CLINICAL and image.getPlane() == Plane.CORONAL and image.getPatient() == False):
     key = PlotKey.clinicalCoronalPhantom
   elif (image.getScanner() == Scanner.WBCT and image.getPlane() == Plane.CORONAL and image.getPatient() == False and image.getAlg() == Alg.NEW):
     key = PlotKey.wbctCoronalPhantom
-    # resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
-    # resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
-    # resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
-    # ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
-    # model = poly.polyfit(attenuation_x, bmd_y, 1)
-    # calibratedBMD = poly.polyval(attenuation_x, model)
-    # bmd_800_prof = model[0] + (prof_800 * model[1])
-    # bmd_800_limit = np.zeros_like(bmd_800_prof)
-    # bmd_800_limit[:] = 800
-    # bmd800TrueLimit = np.zeros_like(bmd_800_prof)
-    # bmd800TrueLimit[:] = calibratedBMD[2]
+    resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
+    resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
+    resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
+    ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
+    model = poly.polyfit(attenuation_x, bmd_y, 1)
+    calibratedBMD = poly.polyval(attenuation_x, model)
+    bmd_800_prof = model[0] + (prof_800 * model[1])
+    bmd_800_limit = np.zeros_like(bmd_800_prof)
+    bmd_800_limit[:] = 800
+    bmd800TrueLimit = np.zeros_like(bmd_800_prof)
+    bmd800TrueLimit[:] = calibratedBMD[2]
   elif (image.getScanner() == Scanner.WBCT and image.getPlane() == Plane.CORONAL and image.getPatient() == True and image.getAlg() == Alg.NEW):
     key = PlotKey.wbctCoronalPatient
-    # resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
-    # resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
-    # resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
-    # ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
-    # model = poly.polyfit(attenuation_x, bmd_y, 1)
-    # calibratedBMD = poly.polyval(attenuation_x, model)
-    # bmd_800_prof = model[0] + (prof_800 * model[1])
-    # bmd_800_limit = np.zeros_like(bmd_800_prof)
-    # bmd_800_limit[:] = 800
-    # bmd800TrueLimit = np.zeros_like(bmd_800_prof)
-    # bmd800TrueLimit[:] = calibratedBMD[2]
+    resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
+    resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
+    resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
+    ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
+    model = poly.polyfit(attenuation_x, bmd_y, 1)
+    calibratedBMD = poly.polyval(attenuation_x, model)
+    bmd_800_prof = model[0] + (prof_800 * model[1])
+    bmd_800_limit = np.zeros_like(bmd_800_prof)
+    bmd_800_limit[:] = 800
+    bmd800TrueLimit = np.zeros_like(bmd_800_prof)
+    bmd800TrueLimit[:] = calibratedBMD[2]
   elif (image.getScanner() == Scanner.CLINICAL and image.getPlane() == Plane.CORONAL and image.getPatient() == True):
     key = PlotKey.clinicalCoronalPatient
 

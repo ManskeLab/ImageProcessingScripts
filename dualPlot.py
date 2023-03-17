@@ -3,50 +3,56 @@ import matplotlib.pyplot as plt
 import os
 import sys
 from enum import Enum
+from uniform_seg import PlotKey
 
 plotTogether = {}
 
-class PlotKey(Enum):
-  clinicalAxialPhantom = 0
-  wbctAxialPhantom = 1
-  clinicalCoronalPhantom = 2
-  wbctCoronalPhantom = 3
-  wbctCoronalPatient = 4
-  clinicalCoronalPatient = 5
+def dualPlotNoResampleSameXEnd(key1: PlotKey, key2: PlotKey, directory: str) -> None:
+  (x_axis1, bmd_800_prof1, bmd800TrueLimit1, bmd_800_limit1) = plotTogether[key1]
+  (x_axis2, bmd_800_prof2, bmd800TrueLimit2, bmd_800_limit2) = plotTogether[key2]
 
-# no resample, same xend
-# if (x_axis1[0] <= x_axis2[0]):
-  # diff = x_axis2[0] - x_axis1[0]
-  # x_axis2 -= diff
-# else:
-  # diff = x_axis1[0] - x_axis2[0]
-  # x_axis1 -= diff
-# 
-# if (x_axis1[-1] <= x_axis2[-1]):
-  # xEnd = x_axis1[-1]
-  # smallestIndex = 0
-  # smallestDifference = abs(x_axis2[0] - xEnd)
-  # for i in range(1, len(x_axis2)):
-    # if (abs(x_axis2[i] - xEnd) < smallestDifference):
-      # smallestIndex = i
-      # smallestDifference = abs(x_axis2[i] - xEnd)
-  # x_axis2 = x_axis2[0:smallestIndex+1]
-  # bmd_800_prof2 = bmd_800_prof2[0:smallestIndex+1]
-  # bmd800TrueLimit2 = bmd800TrueLimit2[0:smallestIndex+1]
-# else:
-  # xEnd = x_axis2[-1]
-  # smallestIndex = 0
-  # smallestDifference = abs(x_axis1[0] - xEnd)
-  # for i in range(1, len(x_axis1)):
-    # if (abs(x_axis1[i] - xEnd) < smallestDifference):
-      # smallestIndex = i
-      # smallestDifference = abs(x_axis1[i] - xEnd)
-  # x_axis1 = x_axis1[0:smallestIndex+1]
-  # bmd_800_prof1 = bmd_800_prof1[0:smallestIndex+1]
-  # bmd800TrueLimit1 = bmd800TrueLimit1[0:smallestIndex+1]
-  # bmd_800_limit1 = bmd_800_limit1[0:smallestIndex+1]
+  if (x_axis1[0] <= x_axis2[0]):
+    diff = x_axis2[0] - x_axis1[0]
+    x_axis2 -= diff
+  else:
+    diff = x_axis1[0] - x_axis2[0]
+    x_axis1 -= diff
 
-def dualPlot(key1: PlotKey, key2: PlotKey, directory: str) -> None:
+  if (x_axis1[-1] <= x_axis2[-1]):
+    xEnd = x_axis1[-1]
+    smallestIndex = 0
+    smallestDifference = abs(x_axis2[0] - xEnd)
+    for i in range(1, len(x_axis2)):
+      if (abs(x_axis2[i] - xEnd) < smallestDifference):
+        smallestIndex = i
+        smallestDifference = abs(x_axis2[i] - xEnd)
+    x_axis2 = x_axis2[0:smallestIndex+1]
+    bmd_800_prof2 = bmd_800_prof2[0:smallestIndex+1]
+    bmd800TrueLimit2 = bmd800TrueLimit2[0:smallestIndex+1]
+  else:
+    xEnd = x_axis2[-1]
+    smallestIndex = 0
+    smallestDifference = abs(x_axis1[0] - xEnd)
+    for i in range(1, len(x_axis1)):
+      if (abs(x_axis1[i] - xEnd) < smallestDifference):
+        smallestIndex = i
+        smallestDifference = abs(x_axis1[i] - xEnd)
+    x_axis1 = x_axis1[0:smallestIndex+1]
+    bmd_800_prof1 = bmd_800_prof1[0:smallestIndex+1]
+    bmd800TrueLimit1 = bmd800TrueLimit1[0:smallestIndex+1]
+    bmd_800_limit1 = bmd_800_limit1[0:smallestIndex+1]
+
+  plt.plot(x_axis1, bmd_800_prof1, 'r-', x_axis2, bmd_800_prof2, 'b-')
+  plt.plot(x_axis1, bmd800TrueLimit1, 'k--', x_axis2, bmd800TrueLimit2, 'y--', x_axis1, bmd_800_limit1, 'm-')
+  plt.ylim(700, 860)
+  plt.title("Uniformity Profile: %s vs. %s" % (key1.name, key2.name))
+  plt.xlabel("Distance (mm)")
+  plt.ylabel("BMD (mgHA/cm3)")
+  filename = "%s_%s.png" % (key1.name, key2.name)
+  plt.savefig(os.path.join(directory, filename))
+  plt.clf()
+
+def dualPlotResampled(key1: PlotKey, key2: PlotKey, directory: str) -> None:
   (x_axis1, bmd_800_prof1, bmd800TrueLimit1, bmd_800_limit1) = plotTogether[key1]
   (x_axis2, bmd_800_prof2, bmd800TrueLimit2, bmd_800_limit2) = plotTogether[key2]
 
@@ -58,8 +64,6 @@ def dualPlot(key1: PlotKey, key2: PlotKey, directory: str) -> None:
 
   plt.plot(x_axis, bmd_800_prof1, 'r-', x_axis, bmd_800_prof2, 'b-')
   plt.plot(x_axis, bmd800TrueLimit1, 'k--', x_axis, bmd800TrueLimit2, 'y--', x_axis, bmd_800_limit, 'm-')
-  # plt.plot(x_axis1, bmd_800_prof1, 'r-', x_axis2, bmd_800_prof2, 'b-')
-  # plt.plot(x_axis1, bmd800TrueLimit1, 'k--', x_axis2, bmd800TrueLimit2, 'y--', x_axis1, bmd_800_limit1, 'm-')
   plt.ylim(700, 860)
   plt.title("Uniformity Profile: %s vs. %s" % (key1.name, key2.name))
   plt.xlabel("Distance (mm)")
@@ -73,8 +77,19 @@ def main():
     print("Usage: python dualPlot.py <directory>")
     sys.exit(1)
   directory = sys.argv[1]
+
+  isResampled = 'y'
+  print("Using resampled data? [y]/n")
+  isResampled = input()
+  if (isResampled == 'y' or isResampled == ""):
+    isResampled = True
+  elif (isResampled == 'n'):
+    isResampled = False
+  else:
+    sys.exit(1)
   
-  with open(os.path.join(directory, "dualPlots.txt"), "r") as f:
+  filename = "dualPlots.txt" if isResampled else "dualPlotsResampled.txt"
+  with open(os.path.join(directory, filename), "r") as f:
     currentKey = None
     data = []
     for line in f:
@@ -103,7 +118,10 @@ def main():
     (PlotKey.clinicalCoronalPatient, PlotKey.clinicalCoronalPhantom)
   ]
   for i in range(len(combinations)):
-    dualPlot(combinations[i][0], combinations[i][1], otherPlotsDirectory)
+    if (isResampled):
+      dualPlotResampled(combinations[i][0], combinations[i][1], otherPlotsDirectory)
+    else:
+      dualPlotNoResampleSameXEnd(combinations[i][0], combinations[i][1], otherPlotsDirectory)
 
  
 if __name__ == "__main__":

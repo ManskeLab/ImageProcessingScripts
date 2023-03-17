@@ -1,0 +1,10 @@
+# back-up files
+*~
+# vim swp files
+*.swp
+# compiled python files
+*.pyc
+# Mac System File
+.DS_Store
+
+__pycache__/
