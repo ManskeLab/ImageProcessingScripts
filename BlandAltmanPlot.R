@@ -1,7 +1,5 @@
-argv <- commandArgs(TRUE)
-
-firstfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/coronal_clinical/profile.csv"
-secondfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/PKOA_112_clinical/profile.csv"
+firstfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/PKOA_112_clinical/profile.csv"
+secondfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/PKOA_112_wbct/profileResampled.csv"
 
 firstData <- read.csv(firstfn)
 secondData <- read.csv(secondfn)
@@ -25,20 +23,21 @@ df$mean <- rowMeans(df)
 df$difference <- df$bmd1 - df$bmd2
 
 meanDiff <- mean(df$difference)
+print(meanDiff)
 
-model <- lm(df$difference~df$mean)
-model
+model <- lm(difference~mean, data = df)
 
-# confidence interval of mean difference
-zStar <- qnorm(0.975)
-lowerLimit <- meanDiff - zStar * sd(df$difference)
-upperLimit <- meanDiff + zStar * sd(df$difference)
+newX <- seq(min(df$mean), max(df$mean), length.out=length(df$difference))
+prediction <- predict(model, newdata = data.frame(mean=newX), interval='confidence')
 
-plot(df$mean, df$difference, main = "Bland-Altman Plot", xlab = "Mean", ylab = "Difference", ylim = c(lowerLimit - 8, upperLimit + 5))
+title <- expression("BMD 800 mgHA/cm"^3)
+xLabel <- "Mean (cCT.Pa and WBCT.Pa)"
+yLabel <- "Error (cCT.Pa - WBCT.Pa)"
+
+plot(difference~mean, data = df, main = title, xlab = xLabel, ylab = yLabel, pch=19)
+text(x=max(df$mean)-0.05, y=meanDiff, bquote(bar(x) * " = " * .(meanDiff)))
+abline(model, col='red', lwd=2)
 abline(h=0,col='grey',lty=1, lwd=1) 
-abline(h=meanDiff,col='blue',lty=1, lwd=1.5)
-abline(h=lowerLimit,col='red',lty=2, lwd=1.5)
-abline(h=upperLimit,col='red',lty=2, lwd=1.5)
-abline(model)
-
+lines(newX, prediction[,3], col='blue', lty = 2, lwd = 2)
+lines(newX, prediction[,2], col='blue', lty = 2, lwd = 2)
 summary(model)
