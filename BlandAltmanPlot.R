@@ -1,11 +1,11 @@
-firstfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/PKOA_112_clinical/profile.csv"
-secondfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/PKOA_112_wbct/profileResampled.csv"
+firstfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/coronal_clinical/profile.csv"
+secondfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/coronal_wbct/profileResampled.csv"
 
 firstData <- read.csv(firstfn)
 secondData <- read.csv(secondfn)
 
-firstBmd <- firstData$BMD800
-secondBmd <- secondData$BMD800
+firstBmd <- firstData$BMD100
+secondBmd <- secondData$BMD100
 
 firstLength <- length(firstBmd)
 secondLength <- length(secondBmd)
@@ -30,9 +30,9 @@ model <- lm(difference~mean, data = df)
 newX <- seq(min(df$mean), max(df$mean), length.out=length(df$difference))
 prediction <- predict(model, newdata = data.frame(mean=newX), interval='confidence')
 
-title <- expression("BMD 800 mgHA/cm"^3)
-xLabel <- "Mean (cCT.Pa and WBCT.Pa)"
-yLabel <- "Error (cCT.Pa - WBCT.Pa)"
+title <- expression("BMD 100 mgHA/cm"^3)
+xLabel <- "Mean (cCT.Ph and WBCT.Ph)"
+yLabel <- "Error (cCT.Ph - WBCT.Ph)"
 
 plot(difference~mean, data = df, main = title, xlab = xLabel, ylab = yLabel, pch=19)
 text(x=max(df$mean)-0.05, y=meanDiff, bquote(bar(x) * " = " * .(meanDiff)))

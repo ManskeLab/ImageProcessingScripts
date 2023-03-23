@@ -27,10 +27,11 @@ numEstimatedParameters = 2
 df = numCalibration - numEstimatedParameters
 
 attributeFile = "notes.txt"
-dualPlotFilename = "dualPlotsResampled.txt"
 
 calibrationCoefficients = []
 calibrationPoints = []
+
+isFirstTimeOpeningDualPlots = True
 
 # keys
 class PlotKey(Enum):
@@ -252,6 +253,7 @@ def mask_calc(image: Image, calibrate = False):
   return ((prof_100, prof_400, prof_800), attenuation_x, x_axis)
 
 def lineProfile(image: Image, directory: str) -> tuple:
+  global isFirstTimeOpeningDualPlots
   # Allow user to import image file, creates reader and requests rendering type
   image_original_copy = image.getImage()
 
@@ -340,50 +342,83 @@ def lineProfile(image: Image, directory: str) -> tuple:
     key = PlotKey.clinicalAxialPhantom
   elif (image.getScanner() == Scanner.WBCT and image.getPlane() == Plane.AXIAL and image.getPatient() == False and image.getAlg() == Alg.NEW):
     key = PlotKey.wbctAxialPhantom
-    resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
-    resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
-    resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
-    ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
-    model = poly.polyfit(attenuation_x, bmd_y, 1)
-    calibratedBMD = poly.polyval(attenuation_x, model)
-    bmd_800_prof = model[0] + (prof_800 * model[1])
-    bmd_800_limit = np.zeros_like(bmd_800_prof)
-    bmd_800_limit[:] = 800
-    bmd800TrueLimit = np.zeros_like(bmd_800_prof)
-    bmd800TrueLimit[:] = calibratedBMD[2]
   elif (image.getScanner() == Scanner.CLINICAL and image.getPlane() == Plane.CORONAL and image.getPatient() == False):
     key = PlotKey.clinicalCoronalPhantom
   elif (image.getScanner() == Scanner.WBCT and image.getPlane() == Plane.CORONAL and image.getPatient() == False and image.getAlg() == Alg.NEW):
     key = PlotKey.wbctCoronalPhantom
-    resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
-    resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
-    resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
-    ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
-    model = poly.polyfit(attenuation_x, bmd_y, 1)
-    calibratedBMD = poly.polyval(attenuation_x, model)
-    bmd_800_prof = model[0] + (prof_800 * model[1])
-    bmd_800_limit = np.zeros_like(bmd_800_prof)
-    bmd_800_limit[:] = 800
-    bmd800TrueLimit = np.zeros_like(bmd_800_prof)
-    bmd800TrueLimit[:] = calibratedBMD[2]
   elif (image.getScanner() == Scanner.WBCT and image.getPlane() == Plane.CORONAL and image.getPatient() == True and image.getAlg() == Alg.NEW):
     key = PlotKey.wbctCoronalPatient
-    resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
-    resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
-    resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
-    ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
-    model = poly.polyfit(attenuation_x, bmd_y, 1)
-    calibratedBMD = poly.polyval(attenuation_x, model)
-    bmd_800_prof = model[0] + (prof_800 * model[1])
-    bmd_800_limit = np.zeros_like(bmd_800_prof)
-    bmd_800_limit[:] = 800
-    bmd800TrueLimit = np.zeros_like(bmd_800_prof)
-    bmd800TrueLimit[:] = calibratedBMD[2]
   elif (image.getScanner() == Scanner.CLINICAL and image.getPlane() == Plane.CORONAL and image.getPatient() == True):
     key = PlotKey.clinicalCoronalPatient
 
+  resampledString = "resampled" # Make empty string if not resampled
+  if (resampledString == "resampled" and image.getScanner() == Scanner.WBCT):
+    resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
+    resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
+    resampledImage = ImageBuilder.createImage(resampledImageFilename, resampledSegFilename, image.directory)
+    ((prof_100, prof_400, prof_800), attenuation_x, x_axis) = mask_calc(resampledImage, calibrate)
+    model = poly.polyfit(attenuation_x, bmd_y, 1)
+    calibratedBMD = poly.polyval(attenuation_x, model)
+
+    bmd_100_prof = model[0] + (prof_100 * model[1])
+    bmd_100_limit = np.zeros_like(bmd_100_prof)
+    bmd_100_limit[:] = 100
+    bmd100TrueLimit = np.zeros_like(bmd_100_prof)
+    bmd100TrueLimit[:] = calibratedBMD[0]
+       
+    bmd_400_prof = model[0] + (prof_400 * model[1])
+    bmd_400_limit = np.zeros_like(bmd_400_prof)
+    bmd_400_limit[:] = 400
+    bmd400TrueLimit = np.zeros_like(bmd_400_prof)
+    bmd400TrueLimit[:] = calibratedBMD[1]
+
+    bmd_800_prof = model[0] + (prof_800 * model[1])
+    bmd_800_limit = np.zeros_like(bmd_800_prof)
+    bmd_800_limit[:] = 800
+    bmd800TrueLimit = np.zeros_like(bmd_800_prof)
+    bmd800TrueLimit[:] = calibratedBMD[2]
+
   if (key is not None):
-    with open(os.path.join(directory, dualPlotFilename), "a") as f:
+    dual100 = os.path.join(directory, "dualPlots100%s.txt" % resampledString)
+    dual400 = os.path.join(directory, "dualPlots400%s.txt" % resampledString)
+    dual800 = os.path.join(directory, "dualPlots800%s.txt" % resampledString)
+
+    if (isFirstTimeOpeningDualPlots):
+      # Create new files
+      with open(dual100, "w") as f1, open(dual400, "w") as f2, open(dual800, "w") as f3:
+        isFirstTimeOpeningDualPlots = False
+    
+    with open(dual100, "a") as f1, open(dual400, "a") as f2, open(dual800, "a") as f3:
+      line0 = str(key.value)
+      x_axis_str = [str(x) for x in x_axis]
+      line1 = ",".join(x_axis_str)
+      bmd_100_prof_str = [str(x) for x in bmd_100_prof]
+      line2 = ",".join(bmd_100_prof_str)
+      bmd100TrueLimitStr = [str(x) for x in bmd100TrueLimit]
+      line3 = ",".join(bmd100TrueLimitStr)
+      bmd_100_limit_str = [str(x) for x in bmd_100_limit]
+      line4 = ",".join(bmd_100_limit_str)
+      f1.write(line0 + '\n')
+      f1.write(line1 + '\n')
+      f1.write(line2 + '\n')
+      f1.write(line3 + '\n')
+      f1.write(line4 + '\n')
+
+      line0 = str(key.value)
+      x_axis_str = [str(x) for x in x_axis]
+      line1 = ",".join(x_axis_str)
+      bmd_400_prof_str = [str(x) for x in bmd_400_prof]
+      line2 = ",".join(bmd_400_prof_str)
+      bmd400TrueLimitStr = [str(x) for x in bmd400TrueLimit]
+      line3 = ",".join(bmd400TrueLimitStr)
+      bmd_400_limit_str = [str(x) for x in bmd_400_limit]
+      line4 = ",".join(bmd_400_limit_str)
+      f2.write(line0 + '\n')
+      f2.write(line1 + '\n')
+      f2.write(line2 + '\n')
+      f2.write(line3 + '\n')
+      f2.write(line4 + '\n')
+
       line0 = str(key.value)
       x_axis_str = [str(x) for x in x_axis]
       line1 = ",".join(x_axis_str)
@@ -393,12 +428,11 @@ def lineProfile(image: Image, directory: str) -> tuple:
       line3 = ",".join(bmd800TrueLimitStr)
       bmd_800_limit_str = [str(x) for x in bmd_800_limit]
       line4 = ",".join(bmd_800_limit_str)
-
-      f.write(line0 + '\n')
-      f.write(line1 + '\n')
-      f.write(line2 + '\n')
-      f.write(line3 + '\n')
-      f.write(line4 + '\n')
+      f3.write(line0 + '\n')
+      f3.write(line1 + '\n')
+      f3.write(line2 + '\n')
+      f3.write(line3 + '\n')
+      f3.write(line4 + '\n')
 
   return result
 
@@ -446,11 +480,6 @@ def main():
     sys.exit(1)
   directory = sys.argv[1]
 
-  # create new file
-  f = open(os.path.join(directory, dualPlotFilename), "w")
-  f.close() 
-  #################
-
   data = {
     "scanner": [], "plane": [],
     "intercept": [], "slope": [], "R2": [], "RSE": [],
@@ -497,9 +526,9 @@ def main():
       data["mean800Profile"].append(stats800Prof[0])
       data["stDev800Profile"].append(stats800Prof[1])
 
-  writeMapToDataFrameToCSVWithIndex(data, index, directory)
+  # writeMapToDataFrameToCSVWithIndex(data, index, directory)
 
-  plotAllCalibration(directory)
+  # plotAllCalibration(directory)
 
   print('\n Complete')
   print('\n************************************************************************')

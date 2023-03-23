@@ -1,5 +1,5 @@
-firstfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/PKOA_112_clinical/profile.csv"
-secondfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/PKOA_112_wbct/profileResampled.csv"
+firstfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/coronal_clinical/profile.csv"
+secondfn <- "/Volumes/Seagate Backup Plus Drive/WBCT Reconstruction/segmentation images/coronal_wbct/profileResampled.csv"
 
 firstData <- read.csv(firstfn)
 secondData <- read.csv(secondfn)
@@ -19,8 +19,8 @@ if (firstLength <= secondLength) {
 model <- lm(secondBmd~firstBmd)
 
 title <- expression("BMD 100 mgHA/cm"^3)
-xLabel <- "cCT.Pa"
-yLabel <- "WBCT.Pa"
+xLabel <- "cCT.Ph"
+yLabel <- "WBCT.Ph"
 
 plot(secondBmd~firstBmd, main = title, xlab = xLabel, ylab = yLabel, pch=19)
 abline(model, col='red', lwd=2)

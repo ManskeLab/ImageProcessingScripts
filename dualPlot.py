@@ -7,9 +7,9 @@ from uniform_seg import PlotKey
 
 plotTogether = {}
 
-def dualPlotNoResampleSameXEnd(key1: PlotKey, key2: PlotKey, directory: str) -> None:
-  (x_axis1, bmd_800_prof1, bmd800TrueLimit1, bmd_800_limit1) = plotTogether[key1]
-  (x_axis2, bmd_800_prof2, bmd800TrueLimit2, bmd_800_limit2) = plotTogether[key2]
+def dualPlotNoResampleSameXEnd(key1: PlotKey, key2: PlotKey, directory: str, bmd: int) -> None:
+  (x_axis1, bmd_prof1, bmdTrueLimit1, bmd_limit1) = plotTogether[key1]
+  (x_axis2, bmd_prof2, bmdTrueLimit2, bmd_limit2) = plotTogether[key2]
 
   if (x_axis1[0] <= x_axis2[0]):
     diff = x_axis2[0] - x_axis1[0]
@@ -27,8 +27,8 @@ def dualPlotNoResampleSameXEnd(key1: PlotKey, key2: PlotKey, directory: str) -> 
         smallestIndex = i
         smallestDifference = abs(x_axis2[i] - xEnd)
     x_axis2 = x_axis2[0:smallestIndex+1]
-    bmd_800_prof2 = bmd_800_prof2[0:smallestIndex+1]
-    bmd800TrueLimit2 = bmd800TrueLimit2[0:smallestIndex+1]
+    bmd_prof2 = bmd_prof2[0:smallestIndex+1]
+    bmdTrueLimit2 = bmdTrueLimit2[0:smallestIndex+1]
   else:
     xEnd = x_axis2[-1]
     smallestIndex = 0
@@ -38,37 +38,49 @@ def dualPlotNoResampleSameXEnd(key1: PlotKey, key2: PlotKey, directory: str) -> 
         smallestIndex = i
         smallestDifference = abs(x_axis1[i] - xEnd)
     x_axis1 = x_axis1[0:smallestIndex+1]
-    bmd_800_prof1 = bmd_800_prof1[0:smallestIndex+1]
-    bmd800TrueLimit1 = bmd800TrueLimit1[0:smallestIndex+1]
-    bmd_800_limit1 = bmd_800_limit1[0:smallestIndex+1]
+    bmd_prof1 = bmd_prof1[0:smallestIndex+1]
+    bmdTrueLimit1 = bmdTrueLimit1[0:smallestIndex+1]
+    bmd_limit1 = bmd_limit1[0:smallestIndex+1]
 
-  plt.plot(x_axis1, bmd_800_prof1, 'r-', x_axis2, bmd_800_prof2, 'b-')
-  plt.plot(x_axis1, bmd800TrueLimit1, 'k--', x_axis2, bmd800TrueLimit2, 'y--', x_axis1, bmd_800_limit1, 'm-')
-  plt.ylim(700, 860)
-  plt.title("Uniformity Profile: %s vs. %s" % (key1.name, key2.name))
+  plt.plot(x_axis1, bmd_prof1, 'r-', x_axis2, bmd_prof2, 'b-')
+  plt.plot(x_axis1, bmdTrueLimit1, 'k--', x_axis2, bmdTrueLimit2, 'y--', x_axis1, bmd_limit1, 'm-')
+  if (bmd == 100):
+    plt.ylim(0, 160)
+  elif (bmd == 400):
+    plt.ylim(300, 460)
+  else:
+    plt.ylim(700, 860)
+  plt.title("Uniformity Profile %d: %s vs. %s" % (bmd, key1.name, key2.name))
   plt.xlabel("Distance (mm)")
   plt.ylabel("BMD (mgHA/cm3)")
-  filename = "%s_%s.png" % (key1.name, key2.name)
+  filename = "%s_%s_BMD%d.png" % (key1.name, key2.name, bmd)
   plt.savefig(os.path.join(directory, filename))
   plt.clf()
 
-def dualPlotResampled(key1: PlotKey, key2: PlotKey, directory: str) -> None:
-  (x_axis1, bmd_800_prof1, bmd800TrueLimit1, bmd_800_limit1) = plotTogether[key1]
-  (x_axis2, bmd_800_prof2, bmd800TrueLimit2, bmd_800_limit2) = plotTogether[key2]
+def dualPlotResampled(key1: PlotKey, key2: PlotKey, directory: str, bmd: int) -> None:
+  (x_axis1, bmd_prof1, bmdTrueLimit1, bmd_limit1) = plotTogether[key1]
+  (x_axis2, bmd_prof2, bmdTrueLimit2, bmd_limit2) = plotTogether[key2]
 
-  x_axis, bmd_800_limit = (x_axis1, bmd_800_limit1) if (len(x_axis1) <= len(x_axis2)) else (x_axis2, bmd_800_limit2)
-  bmd_800_prof1 = bmd_800_prof1[:len(x_axis)]
-  bmd_800_prof2 = bmd_800_prof2[:len(x_axis)]
-  bmd800TrueLimit1 = bmd800TrueLimit1[:len(x_axis)]
-  bmd800TrueLimit2 = bmd800TrueLimit2[:len(x_axis)]
+  x_axis, bmd_800_limit = (x_axis1, bmd_limit1) if (len(x_axis1) <= len(x_axis2)) else (x_axis2, bmd_limit2)
+  # bmd_prof1 = bmd_prof1[:len(x_axis)] # beginning of profile
+  # bmd_prof2 = bmd_prof2[:len(x_axis)] # beginning of profile
+  bmd_prof1 = bmd_prof1[len(bmd_prof1) - len(x_axis):len(bmd_prof1)] # end of profile
+  bmd_prof2 = bmd_prof2[len(bmd_prof2) - len(x_axis):len(bmd_prof2)] # end of profile
+  bmdTrueLimit1 = bmdTrueLimit1[:len(x_axis)]
+  bmdTrueLimit2 = bmdTrueLimit2[:len(x_axis)]
 
-  plt.plot(x_axis, bmd_800_prof1, 'r-', x_axis, bmd_800_prof2, 'b-')
-  plt.plot(x_axis, bmd800TrueLimit1, 'k--', x_axis, bmd800TrueLimit2, 'y--', x_axis, bmd_800_limit, 'm-')
-  plt.ylim(700, 860)
-  plt.title("Uniformity Profile: %s vs. %s" % (key1.name, key2.name))
+  plt.plot(x_axis, bmd_prof1, 'r-', x_axis, bmd_prof2, 'b-')
+  plt.plot(x_axis, bmdTrueLimit1, 'k--', x_axis, bmdTrueLimit2, 'y--', x_axis, bmd_800_limit, 'm-')
+  if (bmd == 100):
+    plt.ylim(0, 160)
+  elif (bmd == 400):
+    plt.ylim(300, 460)
+  else:
+    plt.ylim(700, 860)
+  plt.title("Uniformity Profile %d: %s vs. %s" % (bmd, key1.name, key2.name))
   plt.xlabel("Distance (mm)")
   plt.ylabel("BMD (mgHA/cm3)")
-  filename = "%s_%s.png" % (key1.name, key2.name)
+  filename = "%s_%s_BMD%d.png" % (key1.name, key2.name, bmd)
   plt.savefig(os.path.join(directory, filename))
   plt.clf()
 
@@ -88,7 +100,15 @@ def main():
   else:
     sys.exit(1)
   
-  filename = "dualPlots.txt" if isResampled else "dualPlotsResampled.txt"
+  newDirName = "dual_plots" if not isResampled else "dual_plots_resampled"
+  dualPlotsDirectory = os.path.join(directory, newDirName)
+  os.makedirs(dualPlotsDirectory, exist_ok=True)
+  plot(100, isResampled, directory, dualPlotsDirectory)
+  plot(400, isResampled, directory, dualPlotsDirectory)
+  plot(800, isResampled, directory, dualPlotsDirectory)
+  
+def plot(bmd: int, isResampled: bool, directory: str, saveDirectory: str):
+  filename = "dualPlots%d.txt" % (bmd) if not isResampled else "dualPlots%dResampled.txt" % (bmd)
   with open(os.path.join(directory, filename), "r") as f:
     currentKey = None
     data = []
@@ -109,8 +129,6 @@ def main():
     if (len(data) > 0):
       plotTogether[currentKey] = data
 
-  otherPlotsDirectory = os.path.join(directory, "other_plots")
-  os.makedirs(otherPlotsDirectory, exist_ok=True)
   combinations = [
     (PlotKey.clinicalCoronalPhantom, PlotKey.wbctCoronalPhantom),
     (PlotKey.wbctCoronalPatient, PlotKey.wbctCoronalPhantom),
@@ -119,10 +137,9 @@ def main():
   ]
   for i in range(len(combinations)):
     if (isResampled):
-      dualPlotResampled(combinations[i][0], combinations[i][1], otherPlotsDirectory)
+      dualPlotResampled(combinations[i][0], combinations[i][1], saveDirectory, bmd)
     else:
-      dualPlotNoResampleSameXEnd(combinations[i][0], combinations[i][1], otherPlotsDirectory)
-
+      dualPlotNoResampleSameXEnd(combinations[i][0], combinations[i][1], saveDirectory, bmd)
  
 if __name__ == "__main__":
   main()
