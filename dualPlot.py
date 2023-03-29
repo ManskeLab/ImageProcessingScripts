@@ -131,7 +131,7 @@ def main():
   directory = sys.argv[1]
 
   isResampled = 'y'
-  print("Using resampled data? [y]/n")
+  print("Using resampled data? y/[n]")
   isResampled = input()
   if (isResampled == 'y'):
     isResampled = True
