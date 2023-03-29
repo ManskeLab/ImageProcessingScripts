@@ -351,7 +351,7 @@ def lineProfile(image: Image, directory: str) -> tuple:
   elif (image.getScanner() == Scanner.CLINICAL and image.getPlane() == Plane.CORONAL and image.getPatient() == True):
     key = PlotKey.clinicalCoronalPatient
 
-  resampledString = "resampled" # Make empty string if not resampled
+  resampledString = "" # "resampled" = resampled image, "" = unresampled image
   if (resampledString == "resampled" and image.getScanner() == Scanner.WBCT):
     resampledImageFilename = image.getImageFilename()[:-4] + "_resampled.nii"
     resampledSegFilename = image.getImageFilename()[:-4] + "_resampled_seg.nii"
@@ -526,9 +526,9 @@ def main():
       data["mean800Profile"].append(stats800Prof[0])
       data["stDev800Profile"].append(stats800Prof[1])
 
-  # writeMapToDataFrameToCSVWithIndex(data, index, directory)
+  writeMapToDataFrameToCSVWithIndex(data, index, directory)
 
-  # plotAllCalibration(directory)
+  plotAllCalibration(directory)
 
   print('\n Complete')
   print('\n************************************************************************')

@@ -36,7 +36,7 @@ class DisjointSet:
         self.parent[parentY] = parentX
         self.rank[parentX] += 1
 
-def findConnectedComponents(a: np.array, label: int):
+def findConnectedComponents(a: np.array, label: int) -> dict:
   size_x, size_y, size_z = a.shape
   
   def get6ConnectedNeighbours(x, y, z):
@@ -67,7 +67,7 @@ def findConnectedComponents(a: np.array, label: int):
           s.addSet((i,j,k))
           neighbours = get6ConnectedNeighbours(i, j, k)
           for n in neighbours:
-            if (a[n[0],n[1], n[2]] == label):
+            if (a[n] == label):
               s.union((i,j,k), n)
 
   parentToKey = defaultdict(list)
@@ -79,3 +79,52 @@ def findConnectedComponents(a: np.array, label: int):
     labelToIndices[parentToKey[s.find(key)]].append(key)
 
   return labelToIndices
+
+def findMultipleLabelConnectedComponents(a: np.array, labels: list) -> dict:
+  size_x, size_y, size_z = a.shape
+  
+  def get6ConnectedNeighbours(x, y, z):
+    neighbours = []
+    if (x-1 >= 0):
+      neighbours.append((x-1,y,z))
+    if (x+1 <= size_x-1):
+      neighbours.append((x+1,y,z))
+    if (y-1 >= 0):
+      neighbours.append((x,y-1,z))
+    if (y+1 <= size_y-1):
+      neighbours.append((x,y+1,z))
+    if (z-1 >= 0):
+      neighbours.append((x,y,z-1))
+    if (z+1 <= size_z-1):
+      neighbours.append((x,y,z+1))
+    
+    return neighbours
+  
+  allLabelsToLabelToIndices = {}
+  for label in labels:
+    allLabelsToLabelToIndices[label] = defaultdict(list)
+
+  s = {}
+  for label in labels:
+    s[label] = DisjointSet()
+
+  for i in range(size_x):
+    for j in range(size_y):
+      for k in range(size_z):
+        if (a[i,j,k] in labels):
+          s[a[i,j,k]].addSet((i,j,k))
+          neighbours = get6ConnectedNeighbours(i, j, k)
+          for n in neighbours:
+            if (a[n] == a[i,j,k]):
+              s[a[i,j,k]].union((i,j,k), n)
+
+  for label in labels:
+    parentToKey = defaultdict(list)
+    currLocalLabel = 1
+    for key in s[label].parent:
+      if (s[label].find(key) not in parentToKey):
+        parentToKey[s[label].find(key)] = currLocalLabel
+        currLocalLabel += 1
+      allLabelsToLabelToIndices[label][parentToKey[s[label].find(key)]].append(key)
+
+  return allLabelsToLabelToIndices

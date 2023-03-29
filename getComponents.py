@@ -7,7 +7,7 @@ import numpy.polynomial.polynomial as poly
 import pandas as pd
 from vtk.util.numpy_support import vtk_to_numpy
 import sys, os
-from ConnectedComponentLabeling3D import findConnectedComponents
+from ccl3D import findConnectedComponents, findMultipleLabelConnectedComponents
 from uniform_seg import Image, ImageBuilder
 from uniform_seg import writeMapToDataFrameToCSVWithIndex, writeMapToDataFrameToCSV, mask_calc
 
@@ -28,9 +28,12 @@ def getCubesAndWriteValues(image: Image, isResampled: bool=False):
   data = {"BMD100": [], "BMD400": [], "BMD800": []}
 
   cubeLabels = {4: "BMD800", 5: "BMD400", 6: "BMD100"}
-  for label in cubeLabels:
+  labels = [4, 5, 6]
+
+  allLabelsToLabelToIndex = findMultipleLabelConnectedComponents(segmentData, labels)
+  for label in labels:
     print("Label: %d" % label)
-    labelToIndex = findConnectedComponents(segmentData, label)
+    labelToIndex = allLabelsToLabelToIndex[label]
     print(len(labelToIndex))
 
     allCubes = np.array([])
@@ -44,7 +47,7 @@ def getCubesAndWriteValues(image: Image, isResampled: bool=False):
       allCubes = np.append(allCubes, cubeValues)
 
     data[cubeLabels[label]].append(np.mean(allCubes))
-    data[cubeLabels[label]].append(np.std(allCubes, ddof=1))
+    data[cubeLabels[label]].append(np.std(allCubes, ddof=1)) 
   
   if (isResampled):
     writeMapToDataFrameToCSVWithIndex(data, cubeDataNames, image.directory, "cubesResampled.csv")
@@ -79,11 +82,11 @@ def main():
     sys.exit(1)
 
   isResampled = 'y'
-  print("Using resampled data? [y]/n")
+  print("Using resampled data? y/[n]")
   isResampled = input()
-  if (isResampled == 'y' or isResampled == ""):
+  if (isResampled == 'y'):
     isResampled = True
-  elif (isResampled == 'n'):
+  elif (isResampled == 'n' or isResampled == ""):
     isResampled = False
   else:
     sys.exit(1)

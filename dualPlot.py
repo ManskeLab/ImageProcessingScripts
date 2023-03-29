@@ -43,7 +43,7 @@ def dualPlotNoResampleSameXEnd(key1: PlotKey, key2: PlotKey, directory: str, bmd
     bmd_limit1 = bmd_limit1[0:smallestIndex+1]
 
   plt.plot(x_axis1, bmd_prof1, 'r-', x_axis2, bmd_prof2, 'b-')
-  plt.plot(x_axis1, bmdTrueLimit1, 'k--', x_axis2, bmdTrueLimit2, 'y--', x_axis1, bmd_limit1, 'm-')
+  plt.plot(x_axis1, bmdTrueLimit1, 'k--', x_axis2, bmdTrueLimit2, 'y--', x_axis1, bmd_limit1, 'm--')
   if (bmd == 100):
     plt.ylim(0, 160)
   elif (bmd == 400):
@@ -53,6 +53,9 @@ def dualPlotNoResampleSameXEnd(key1: PlotKey, key2: PlotKey, directory: str, bmd
   plt.title("Uniformity Profile %d: %s vs. %s" % (bmd, key1.name, key2.name))
   plt.xlabel("Distance (mm)")
   plt.ylabel("BMD (mgHA/cm3)")
+  firstName = " - ".join(key1.name.split("Coronal"))
+  secondName = " - ".join(key2.name.split("Coronal"))
+  plt.legend([firstName, secondName, firstName + " $\it{calib. avg}$", secondName + " $\it{calib. avg}$", "True BMD"], loc="best")
   filename = "%s_%s_BMD%d.png" % (key1.name, key2.name, bmd)
   plt.savefig(os.path.join(directory, filename))
   plt.clf()
@@ -70,7 +73,7 @@ def dualPlotResampled(key1: PlotKey, key2: PlotKey, directory: str, bmd: int) ->
   bmdTrueLimit2 = bmdTrueLimit2[:len(x_axis)]
 
   plt.plot(x_axis, bmd_prof1, 'r-', x_axis, bmd_prof2, 'b-')
-  plt.plot(x_axis, bmdTrueLimit1, 'k--', x_axis, bmdTrueLimit2, 'y--', x_axis, bmd_800_limit, 'm-')
+  plt.plot(x_axis, bmdTrueLimit1, 'k--', x_axis, bmdTrueLimit2, 'y--', x_axis, bmd_800_limit, 'm--')
   if (bmd == 100):
     plt.ylim(0, 160)
   elif (bmd == 400):
@@ -80,32 +83,12 @@ def dualPlotResampled(key1: PlotKey, key2: PlotKey, directory: str, bmd: int) ->
   plt.title("Uniformity Profile %d: %s vs. %s" % (bmd, key1.name, key2.name))
   plt.xlabel("Distance (mm)")
   plt.ylabel("BMD (mgHA/cm3)")
+  firstName = " - ".join(key1.name.split("Coronal"))
+  secondName = " - ".join(key2.name.split("Coronal"))
+  plt.legend([firstName, secondName, firstName + " $\it{calib. avg}$", secondName + " $\it{calib. avg}$", "True BMD"], loc="best")
   filename = "%s_%s_BMD%d.png" % (key1.name, key2.name, bmd)
   plt.savefig(os.path.join(directory, filename))
   plt.clf()
-
-def main():
-  if (len(sys.argv) != 2):
-    print("Usage: python dualPlot.py <directory>")
-    sys.exit(1)
-  directory = sys.argv[1]
-
-  isResampled = 'y'
-  print("Using resampled data? [y]/n")
-  isResampled = input()
-  if (isResampled == 'y' or isResampled == ""):
-    isResampled = True
-  elif (isResampled == 'n'):
-    isResampled = False
-  else:
-    sys.exit(1)
-  
-  newDirName = "dual_plots" if not isResampled else "dual_plots_resampled"
-  dualPlotsDirectory = os.path.join(directory, newDirName)
-  os.makedirs(dualPlotsDirectory, exist_ok=True)
-  plot(100, isResampled, directory, dualPlotsDirectory)
-  plot(400, isResampled, directory, dualPlotsDirectory)
-  plot(800, isResampled, directory, dualPlotsDirectory)
   
 def plot(bmd: int, isResampled: bool, directory: str, saveDirectory: str):
   filename = "dualPlots%d.txt" % (bmd) if not isResampled else "dualPlots%dResampled.txt" % (bmd)
@@ -130,16 +113,39 @@ def plot(bmd: int, isResampled: bool, directory: str, saveDirectory: str):
       plotTogether[currentKey] = data
 
   combinations = [
-    (PlotKey.clinicalCoronalPhantom, PlotKey.wbctCoronalPhantom),
-    (PlotKey.wbctCoronalPatient, PlotKey.wbctCoronalPhantom),
-    (PlotKey.clinicalCoronalPatient, PlotKey.wbctCoronalPatient),
-    (PlotKey.clinicalCoronalPatient, PlotKey.clinicalCoronalPhantom)
+    (PlotKey.wbctCoronalPhantom, PlotKey.clinicalCoronalPhantom),
+    (PlotKey.wbctCoronalPhantom, PlotKey.wbctCoronalPatient),
+    (PlotKey.wbctCoronalPatient, PlotKey.clinicalCoronalPatient),
+    (PlotKey.clinicalCoronalPhantom, PlotKey.clinicalCoronalPatient)
   ]
   for i in range(len(combinations)):
     if (isResampled):
       dualPlotResampled(combinations[i][0], combinations[i][1], saveDirectory, bmd)
     else:
       dualPlotNoResampleSameXEnd(combinations[i][0], combinations[i][1], saveDirectory, bmd)
+
+def main():
+  if (len(sys.argv) != 2):
+    print("Usage: python dualPlot.py <directory>")
+    sys.exit(1)
+  directory = sys.argv[1]
+
+  isResampled = 'y'
+  print("Using resampled data? [y]/n")
+  isResampled = input()
+  if (isResampled == 'y' or isResampled == ""):
+    isResampled = True
+  elif (isResampled == 'n'):
+    isResampled = False
+  else:
+    sys.exit(1)
+  
+  newDirName = "dual_plots" if not isResampled else "dual_plots_resampled"
+  dualPlotsDirectory = os.path.join(directory, newDirName)
+  os.makedirs(dualPlotsDirectory, exist_ok=True)
+  plot(100, isResampled, directory, dualPlotsDirectory)
+  plot(400, isResampled, directory, dualPlotsDirectory)
+  plot(800, isResampled, directory, dualPlotsDirectory)
  
 if __name__ == "__main__":
   main()
