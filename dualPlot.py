@@ -133,9 +133,9 @@ def main():
   isResampled = 'y'
   print("Using resampled data? [y]/n")
   isResampled = input()
-  if (isResampled == 'y' or isResampled == ""):
+  if (isResampled == 'y'):
     isResampled = True
-  elif (isResampled == 'n'):
+  elif (isResampled == 'n' or isResampled == ""):
     isResampled = False
   else:
     sys.exit(1)
