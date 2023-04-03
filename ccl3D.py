@@ -1,6 +1,10 @@
 import numpy as np
 from collections import defaultdict
 
+"""
+Algorithm by Keven Qiu
+"""
+
 class DisjointSet:
   def __init__(self) -> None:
     self.parent = {}
