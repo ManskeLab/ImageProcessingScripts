@@ -291,9 +291,9 @@ def lineProfile(image: Image, directory: str) -> tuple:
   bmd_400_prof = model[0] + (prof_400 * model[1])
   bmd_800_prof = model[0] + (prof_800 * model[1])
 
-  stats100Prof = (np.mean(bmd_100_prof), np.std(bmd_100_prof))
-  stats400Prof = (np.mean(bmd_400_prof), np.std(bmd_400_prof))
-  stats800Prof = (np.mean(bmd_800_prof), np.std(bmd_800_prof))
+  stats100Prof = (np.mean(bmd_100_prof), np.std(bmd_100_prof, ddof = 1))
+  stats400Prof = (np.mean(bmd_400_prof), np.std(bmd_400_prof, ddof = 1))
+  stats800Prof = (np.mean(bmd_800_prof), np.std(bmd_800_prof, ddof = 1))
 
   bmd_100_limit = np.zeros_like(bmd_100_prof)
   bmd_100_limit[:] = 100

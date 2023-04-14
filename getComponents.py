@@ -38,6 +38,7 @@ def getCubesAndWriteValues(image: Image, isResampled: bool=False):
 
     allCubes = np.array([])
     for i in range(1, len(labelToIndex) + 1): # iterate 3 times
+      print(len(labelToIndex[i]))
       cubeValues = np.zeros(len(labelToIndex[i]))
       for j in range(len(labelToIndex[i])): # iterate over each cube
         voxelValue = imageData[labelToIndex[i][j]]
