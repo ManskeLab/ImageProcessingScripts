@@ -7,6 +7,8 @@ from uniform_seg import PlotKey
 
 plotTogether = {}
 
+nameToProperName = {"clinical": "Clinical", "wbct": "WBCT"}
+
 def dualPlotNoResampleSameXEnd(key1: PlotKey, key2: PlotKey, directory: str, bmd: int) -> None:
   (x_axis1, bmd_prof1, bmdTrueLimit1, bmd_limit1) = plotTogether[key1]
   (x_axis2, bmd_prof2, bmdTrueLimit2, bmd_limit2) = plotTogether[key2]
@@ -53,8 +55,8 @@ def dualPlotNoResampleSameXEnd(key1: PlotKey, key2: PlotKey, directory: str, bmd
   plt.title("Uniformity Profile %d: %s vs. %s" % (bmd, key1.name, key2.name))
   plt.xlabel("Distance (mm)")
   plt.ylabel("BMD (mgHA/cm3)")
-  firstName = " - ".join(key1.name.split("Coronal"))
-  secondName = " - ".join(key2.name.split("Coronal"))
+  firstName = " - ".join(list(map(lambda x: nameToProperName[x] if x in nameToProperName else x, key1.name.split("Coronal"))))
+  secondName = " - ".join(list(map(lambda x: nameToProperName[x] if x in nameToProperName else x, key2.name.split("Coronal"))))
   plt.legend([firstName, secondName, firstName + " $\it{calib. avg}$", secondName + " $\it{calib. avg}$", "True BMD"], loc="best")
   filename = "%s_%s_BMD%d.png" % (key1.name, key2.name, bmd)
   plt.savefig(os.path.join(directory, filename))
@@ -83,8 +85,8 @@ def dualPlotResampled(key1: PlotKey, key2: PlotKey, directory: str, bmd: int) ->
   plt.title("Uniformity Profile %d: %s vs. %s" % (bmd, key1.name, key2.name))
   plt.xlabel("Distance (mm)")
   plt.ylabel("BMD (mgHA/cm3)")
-  firstName = " - ".join(key1.name.split("Coronal"))
-  secondName = " - ".join(key2.name.split("Coronal"))
+  firstName = " - ".join(list(map(lambda x: nameToProperName[x] if x in nameToProperName else x, key1.name.split("Coronal"))))
+  secondName = " - ".join(list(map(lambda x: nameToProperName[x] if x in nameToProperName else x, key2.name.split("Coronal"))))
   plt.legend([firstName, secondName, firstName + " $\it{calib. avg}$", secondName + " $\it{calib. avg}$", "True BMD"], loc="best")
   filename = "%s_%s_BMD%d.png" % (key1.name, key2.name, bmd)
   plt.savefig(os.path.join(directory, filename))
