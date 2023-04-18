@@ -5,6 +5,8 @@ import sys
 from enum import Enum
 from uniform_seg import PlotKey
 
+colors = ["blue", "red", "purple", "orange"]
+
 plotTogether = {}
 
 nameToProperName = {"clinical": "Clinical", "wbct": "WBCT"}
