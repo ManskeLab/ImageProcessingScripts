@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
-colors = ["r", "b", "m", "orange"] # color order
+colors = ["r", "b", "cyan", "orange"] # color order
 spacing = 0.625
 
 allProfiles100 = []
