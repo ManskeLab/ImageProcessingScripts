@@ -30,7 +30,7 @@ def plot(bmd: int, x_axis: np.array, directory: str) -> None:
   plt.plot(x_axis, trueLimits[bmd], "k--")
 
   if (bmd == 100):
-    plt.ylim(20, 180)
+    plt.ylim(0, 160)
   elif (bmd == 400):
     plt.ylim(320, 480)
   else:
