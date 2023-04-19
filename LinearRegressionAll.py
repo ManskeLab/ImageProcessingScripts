@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy.polynomial.polynomial as poly
 import sys, os
-import scipy.stats
 
 # [clinical, wbct, wbct resampled, clinical, wbct, wbct resampled]
 allProfiles100 = [None] * 6
@@ -34,14 +33,14 @@ def plot(comb: tuple, directory: str) -> None:
   secondProfile400 = allProfiles400[index2]
   secondProfile800 = allProfiles800[index2]
 
-  n = min(len(firstProfile100), len(secondProfile100))
+  minLength = min(len(firstProfile100), len(secondProfile100))
 
-  firstProfile100 = firstProfile100[0:n]
-  firstProfile400 = firstProfile400[0:n]
-  firstProfile800 = firstProfile800[0:n]
-  secondProfile100 = secondProfile100[0:n]
-  secondProfile400 = secondProfile400[0:n]
-  secondProfile800 = secondProfile800[0:n]
+  firstProfile100 = firstProfile100[1:minLength]
+  firstProfile400 = firstProfile400[1:minLength]
+  firstProfile800 = firstProfile800[1:minLength]
+  secondProfile100 = secondProfile100[1:minLength]
+  secondProfile400 = secondProfile400[1:minLength]
+  secondProfile800 = secondProfile800[1:minLength]
 
   data = list(zip(firstProfile100, firstProfile400, firstProfile800,
     secondProfile100, secondProfile400, secondProfile800))
@@ -55,83 +54,23 @@ def plot(comb: tuple, directory: str) -> None:
   df["difference400"] = firstProfile400 - secondProfile400
   df["difference800"] = firstProfile800 - secondProfile800
 
-  allMeans = np.concatenate((df["mean100"].to_numpy(),df["mean400"].to_numpy(),df["mean800"].to_numpy()))
-  allDifferences = np.concatenate((df["difference100"].to_numpy(),df["difference400"].to_numpy(),df["difference800"].to_numpy()))
-
-  N = len(allMeans)
-
   meanDiff100 = np.mean(df["difference100"])
   meanDiff400 = np.mean(df["difference400"])
   meanDiff800 = np.mean(df["difference800"])
 
-  sd100 = np.std(df["difference100"], ddof=1) / np.sqrt(n)
-  sd400 = np.std(df["difference400"], ddof=1) / np.sqrt(n)
-  sd800 = np.std(df["difference800"], ddof=1) / np.sqrt(n)
-  print(np.std(df["difference100"], ddof=1), sd400, sd800)
+  model100 = poly.polyfit(df["mean100"], df["difference100"], 1)
+  model400 = poly.polyfit(df["mean400"], df["difference400"], 1)
+  model800 = poly.polyfit(df["mean800"], df["difference800"], 1)
 
-  tStar = scipy.stats.t.ppf(0.975, df=n-1)
-  tStarAll = scipy.stats.t.ppf(0.975, df=N-1)
-  print(tStar)
-
-  individualN = 100
-  x_axis100 = np.linspace(min(df["mean100"]), max(df["mean100"]), individualN)
-  lowerCI100 = meanDiff100 - tStar * sd100
-  upperCI100 = meanDiff100 + tStar * sd100
-
-  x_axis400 = np.linspace(min(df["mean400"]), max(df["mean400"]), individualN)
-  lowerCI400 = meanDiff400 - tStar * sd400
-  upperCI400 = meanDiff400 + tStar * sd400
-
-  x_axis800 = np.linspace(min(df["mean800"]), max(df["mean800"]), individualN)
-  lowerCI800 = meanDiff800 - tStar * sd800
-  upperCI800 = meanDiff800 + tStar * sd800
-
-  meanDiff = np.mean(allDifferences)
-  sdDiff = np.std(allDifferences, ddof=1) / np.sqrt(N)
-  lowerCI = meanDiff - tStarAll * sdDiff
-  upperCI = meanDiff + tStarAll * sdDiff
-
-  # x_axis = np.arange(min(df["mean100"]), max(df["mean800"]), 0.5)
-  x_axis = np.linspace(min(df["mean100"]), max(df["mean800"]), N)
+  x_axis = np.linspace(min(df["mean100"]), max(df["mean800"]), len(df["mean100"]) + len(df["mean400"]) + len(df["mean800"]))
 
   plt.title("%s vs. %s" % (scanToName[index1], scanToName[index2]))
   plt.xlabel("Mean (%s and %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylabel("Error (%s - %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylim(-70,70)
-
-  plt.plot(df["mean100"], df["difference100"], 'o',
-    x_axis100, np.full(individualN, meanDiff100), '-',
-    x_axis100, np.full(individualN, lowerCI100), '--',
-    x_axis100, np.full(individualN, upperCI100), '--',
-    color='cyan', markersize=1
-  )
-  plt.plot(df["mean400"], df["difference400"], 'o',
-    x_axis400, np.full(individualN, meanDiff400), '-',
-    x_axis400, np.full(individualN, lowerCI400), '--',
-    x_axis400, np.full(individualN, upperCI400), '--',
-    color='green', markersize=1
-  )
-  plt.plot(df["mean800"], df["difference800"], 'o',
-    x_axis800, np.full(individualN, meanDiff800), '-',
-    x_axis800, np.full(individualN, lowerCI800), '--',
-    x_axis800, np.full(individualN, upperCI800), '--',
-    color='orange', markersize=1
-  )
-
-  # y = poly.polyval(x_axis, model)
-
-  ##################
-  # results = sm.OLS(allDifferences, allMeans).fit()
-  # st, dat, ss2 = summary_table(results, alpha=0.05)
-  # lowerCI, upperCI = dat[:, 4:6].T
-  ##################
-
-  # lowerCI = 
-
-  # plt.plot(x_axis, y, 'r-')
-  plt.plot(x_axis, np.full(N, meanDiff), 'k-')
-  plt.plot(x_axis, np.full(N, lowerCI), 'k--')
-  plt.plot(x_axis, np.full(N, upperCI), 'k--')
+  plt.plot(df["mean100"], df["difference100"], 'o')
+  plt.plot(df["mean400"], df["difference400"], 'o')
+  plt.plot(df["mean800"], df["difference800"], 'o')
 
   # filename = "%s_%s_BA.png" % (scanToName[index1], scanToName[index2])
   # plt.savefig(os.path.join(directory, filename))
