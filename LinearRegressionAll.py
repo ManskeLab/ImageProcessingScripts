@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy.polynomial.polynomial as poly
 import sys, os
+from uniform_seg import abline
 
 # [clinical, wbct, wbct resampled, clinical, wbct, wbct resampled]
 allProfiles100 = [None] * 6
@@ -21,6 +22,11 @@ scanToName = {
 
 # 0: phantom clinical, 1: phantom wbct, 2: phantom wbct resampled, 3: patient clinical, 4: patient wbct, 5: patient wbct resampled
 combinations = [(2,0), (1,4), (0,3), (5,3)]
+
+def abline(intercept, slope, color, xAxis):
+  """Plot a line from slope and intercept"""
+  y_vals = intercept + slope * xAxis
+  plt.plot(xAxis, y_vals, '-', label=f"$y = {slope:.2f}x+{intercept:.2f}$", color=color)
 
 def plot(comb: tuple, directory: str) -> None:
   index1 = comb[0]
@@ -72,6 +78,8 @@ def plot(comb: tuple, directory: str) -> None:
   )
 
   plt.plot(x_axis, poly.polyval(x_axis, model))
+
+  abline(0, 1, "black", x_axis)
 
   filename = "%s_%s_reg.png" % (scanToName[index1], scanToName[index2])
   plt.savefig(os.path.join(directory, filename))

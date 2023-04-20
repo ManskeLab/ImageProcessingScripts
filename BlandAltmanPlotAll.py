@@ -23,6 +23,8 @@ scanToName = {
 # 0: phantom clinical, 1: phantom wbct, 2: phantom wbct resampled, 3: patient clinical, 4: patient wbct, 5: patient wbct resampled
 combinations = [(2,0), (1,4), (0,3), (5,3)]
 
+differencesToWrite = []
+
 def plot(comb: tuple, directory: str) -> None:
   index1 = comb[0]
   index2 = comb[1]
@@ -58,15 +60,17 @@ def plot(comb: tuple, directory: str) -> None:
   allMeans = np.concatenate((df["mean100"].to_numpy(),df["mean400"].to_numpy(),df["mean800"].to_numpy()))
   allDifferences = np.concatenate((df["difference100"].to_numpy(),df["difference400"].to_numpy(),df["difference800"].to_numpy()))
 
+  differencesToWrite.append((allDifferences, "%s_%s" % (scanToName[index1], scanToName[index2])))
+
   N = len(allMeans)
 
   meanDiff100 = np.mean(df["difference100"])
   meanDiff400 = np.mean(df["difference400"])
   meanDiff800 = np.mean(df["difference800"])
 
-  sd100 = np.std(df["difference100"], ddof=1) / np.sqrt(n)
-  sd400 = np.std(df["difference400"], ddof=1) / np.sqrt(n)
-  sd800 = np.std(df["difference800"], ddof=1) / np.sqrt(n)
+  sd100 = np.std(df["difference100"], ddof=1)
+  sd400 = np.std(df["difference400"], ddof=1)
+  sd800 = np.std(df["difference800"], ddof=1)
 
   tStar = scipy.stats.t.ppf(0.975, df=n-1)
   tStarAll = scipy.stats.t.ppf(0.975, df=N-1)
@@ -85,7 +89,7 @@ def plot(comb: tuple, directory: str) -> None:
   upperCI800 = meanDiff800 + tStar * sd800
 
   meanDiff = np.mean(allDifferences)
-  sdDiff = np.std(allDifferences, ddof=1) / np.sqrt(N)
+  sdDiff = np.std(allDifferences, ddof=1)
   lowerCI = meanDiff - tStarAll * sdDiff
   upperCI = meanDiff + tStarAll * sdDiff
 
@@ -182,6 +186,13 @@ def main():
 
   for c in combinations:
     plot(c, os.path.join(directory, allPlotsDir))
+
+  d = {}
+  for diff, name in differencesToWrite:
+    d[name] = pd.Series(diff)
+
+  df = pd.DataFrame(d)
+  df.to_csv(os.path.join(directory, allPlotsDir, "differences.csv"))
  
 if __name__ == "__main__":
   main()
