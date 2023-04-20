@@ -84,7 +84,7 @@ def main():
     sys.exit(1)
   directory = sys.argv[1]
 
-  newDirName = "BlandAltmanPlots"
+  newDirName = "LinearRegressionPlots"
   allPlotsDir = os.path.join(directory, newDirName)
   os.makedirs(allPlotsDir, exist_ok=True)
 
