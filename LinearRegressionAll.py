@@ -42,39 +42,41 @@ def plot(comb: tuple, directory: str) -> None:
   secondProfile400 = secondProfile400[1:minLength]
   secondProfile800 = secondProfile800[1:minLength]
 
-  data = list(zip(firstProfile100, firstProfile400, firstProfile800,
-    secondProfile100, secondProfile400, secondProfile800))
-  df = pd.DataFrame(data)
+  model100 = poly.polyfit(firstProfile100, secondProfile100, 1)
+  model400 = poly.polyfit(firstProfile400, secondProfile400, 1)
+  model800 = poly.polyfit(firstProfile800, secondProfile800, 1)
 
-  df["mean100"] = (firstProfile100 + secondProfile100) / 2
-  df["mean400"] = (firstProfile400 + secondProfile400) / 2
-  df["mean800"] = (firstProfile800 + secondProfile800) / 2
+  xProfile = np.concatenate((firstProfile100, firstProfile400, firstProfile800))
+  yProfile = np.concatenate((secondProfile100, secondProfile400, secondProfile800))
+  model = poly.polyfit(xProfile, yProfile, 1)
 
-  df["difference100"] = firstProfile100 - secondProfile100
-  df["difference400"] = firstProfile400 - secondProfile400
-  df["difference800"] = firstProfile800 - secondProfile800
-
-  meanDiff100 = np.mean(df["difference100"])
-  meanDiff400 = np.mean(df["difference400"])
-  meanDiff800 = np.mean(df["difference800"])
-
-  model100 = poly.polyfit(df["mean100"], df["difference100"], 1)
-  model400 = poly.polyfit(df["mean400"], df["difference400"], 1)
-  model800 = poly.polyfit(df["mean800"], df["difference800"], 1)
-
-  x_axis = np.linspace(min(df["mean100"]), max(df["mean800"]), len(df["mean100"]) + len(df["mean400"]) + len(df["mean800"]))
+  x_axis = np.arange(min(xProfile), max(xProfile), 0.5)
+  x_axis100 = np.arange(min(firstProfile100), max(firstProfile100), 0.1)
+  x_axis400 = np.arange(min(firstProfile400), max(firstProfile400), 0.1)
+  x_axis800 = np.arange(min(firstProfile800), max(firstProfile800), 0.1)
 
   plt.title("%s vs. %s" % (scanToName[index1], scanToName[index2]))
-  plt.xlabel("Mean (%s and %s)" % (scanToName[index1], scanToName[index2]))
-  plt.ylabel("Error (%s - %s)" % (scanToName[index1], scanToName[index2]))
-  plt.ylim(-70,70)
-  plt.plot(df["mean100"], df["difference100"], 'o')
-  plt.plot(df["mean400"], df["difference400"], 'o')
-  plt.plot(df["mean800"], df["difference800"], 'o')
+  plt.xlabel("%s" % scanToName[index1])
+  plt.ylabel("%s" % scanToName[index2])
+  plt.plot(firstProfile100, secondProfile100, 'o',
+    x_axis100, poly.polyval(x_axis100, model100), '-',
+    color='cyan', markersize=1
+  )
+  plt.plot(firstProfile400, secondProfile400, 'o',
+    x_axis400, poly.polyval(x_axis400, model400), '-',
+    color='green', markersize=1
+  )
+  plt.plot(firstProfile800, secondProfile800, 'o',
+    x_axis800, poly.polyval(x_axis800, model800), '-',
+    color='orange', markersize=1
+  )
 
-  # filename = "%s_%s_BA.png" % (scanToName[index1], scanToName[index2])
-  # plt.savefig(os.path.join(directory, filename))
-  plt.show()
+  plt.plot(x_axis, poly.polyval(x_axis, model))
+
+  filename = "%s_%s_reg.png" % (scanToName[index1], scanToName[index2])
+  plt.savefig(os.path.join(directory, filename))
+  plt.clf()
+  # plt.show()
 
 def main():
   if (len(sys.argv) != 2):
