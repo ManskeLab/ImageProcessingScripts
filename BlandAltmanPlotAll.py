@@ -67,11 +67,9 @@ def plot(comb: tuple, directory: str) -> None:
   sd100 = np.std(df["difference100"], ddof=1) / np.sqrt(n)
   sd400 = np.std(df["difference400"], ddof=1) / np.sqrt(n)
   sd800 = np.std(df["difference800"], ddof=1) / np.sqrt(n)
-  print(np.std(df["difference100"], ddof=1), sd400, sd800)
 
   tStar = scipy.stats.t.ppf(0.975, df=n-1)
   tStarAll = scipy.stats.t.ppf(0.975, df=N-1)
-  print(tStar)
 
   individualN = 100
   x_axis100 = np.linspace(min(df["mean100"]), max(df["mean100"]), individualN)
@@ -118,24 +116,14 @@ def plot(comb: tuple, directory: str) -> None:
     color='orange', markersize=1
   )
 
-  # y = poly.polyval(x_axis, model)
-
-  ##################
-  # results = sm.OLS(allDifferences, allMeans).fit()
-  # st, dat, ss2 = summary_table(results, alpha=0.05)
-  # lowerCI, upperCI = dat[:, 4:6].T
-  ##################
-
-  # lowerCI = 
-
-  # plt.plot(x_axis, y, 'r-')
   plt.plot(x_axis, np.full(N, meanDiff), 'k-')
   plt.plot(x_axis, np.full(N, lowerCI), 'k--')
   plt.plot(x_axis, np.full(N, upperCI), 'k--')
 
-  # filename = "%s_%s_BA.png" % (scanToName[index1], scanToName[index2])
-  # plt.savefig(os.path.join(directory, filename))
-  plt.show()
+  filename = "%s_%s_BA.png" % (scanToName[index1], scanToName[index2])
+  plt.savefig(os.path.join(directory, filename))
+  plt.clf()
+  # plt.show()
 
 def main():
   if (len(sys.argv) != 2):
