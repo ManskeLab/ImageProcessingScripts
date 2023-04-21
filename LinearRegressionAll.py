@@ -65,21 +65,18 @@ def plot(comb: tuple, directory: str) -> None:
   plt.xlabel("%s" % scanToName[index1])
   plt.ylabel("%s" % scanToName[index2])
   plt.plot(firstProfile100, secondProfile100, 'o',
-    x_axis100, poly.polyval(x_axis100, model100), '-',
-    color='cyan', markersize=1
+    color='blue', markersize=1
   )
   plt.plot(firstProfile400, secondProfile400, 'o',
-    x_axis400, poly.polyval(x_axis400, model400), '-',
     color='green', markersize=1
   )
   plt.plot(firstProfile800, secondProfile800, 'o',
-    x_axis800, poly.polyval(x_axis800, model800), '-',
     color='orange', markersize=1
   )
 
-  plt.plot(x_axis, poly.polyval(x_axis, model))
+  plt.plot(x_axis, poly.polyval(x_axis, model), 'k--')
 
-  abline(0, 1, "black", x_axis)
+  abline(0, 1, "grey", x_axis)
 
   filename = "%s_%s_reg.png" % (scanToName[index1], scanToName[index2])
   plt.savefig(os.path.join(directory, filename))
