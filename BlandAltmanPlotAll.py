@@ -88,12 +88,13 @@ def plot(comb: tuple, directory: str) -> None:
   plt.xlabel("Mean (%s and %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylabel("Error (%s - %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylim(-70,70)
-  plt.plot(df["mean100"], df["difference100"], 'o',
-    x_axis100, np.full(individualN, meanDiff100), '-',
-    x_axis100, np.full(individualN, lowerCI100), '--',
-    x_axis100, np.full(individualN, upperCI100), '--',
-    color='cyan', markersize=4
-  )
+  plt.plot(df["mean100"], df["difference100"], 'o', color='blue', markersize=4)
+  plt.plot(x_axis100, np.full(individualN, meanDiff100), 'k-',)
+  plt.plot(x_axis100, np.full(individualN, lowerCI100), 'k--', x_axis100, np.full(individualN, upperCI100), 'k--')
+  plt.plot(x_axis100, np.full(individualN, 0), '-', color='grey')
+  plt.text(max(x_axis100), meanDiff100+2, "$\overline{x} = %.2f$" % meanDiff100, fontsize=7)
+  plt.text(max(x_axis100), lowerCI100-2, "%.2f" % lowerCI100, fontsize=7)
+  plt.text(max(x_axis100), upperCI100+2, "%.2f" % upperCI100, fontsize=7)
   filename = "%s_%s_BMD%d_BA.png" % (scanToName[index1], scanToName[index2], 100)
   plt.savefig(os.path.join(directory, filename))
   plt.clf()
@@ -102,12 +103,13 @@ def plot(comb: tuple, directory: str) -> None:
   plt.xlabel("Mean (%s and %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylabel("Error (%s - %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylim(-70,70)
-  plt.plot(df["mean400"], df["difference400"], 'o',
-    x_axis400, np.full(individualN, meanDiff400), '-',
-    x_axis400, np.full(individualN, lowerCI400), '--',
-    x_axis400, np.full(individualN, upperCI400), '--',
-    color='green', markersize=4
-  )
+  plt.plot(df["mean400"], df["difference400"], 'o', color='green', markersize=4)
+  plt.plot(x_axis400, np.full(individualN, meanDiff400), 'k-',)
+  plt.plot(x_axis400, np.full(individualN, lowerCI400), 'k--', x_axis400, np.full(individualN, upperCI400), 'k--')
+  plt.plot(x_axis400, np.full(individualN, 0), '-', color='grey')
+  plt.text(max(x_axis400), meanDiff400, "$\overline{x} = %.2f$" % meanDiff400, fontsize=7)
+  plt.text(max(x_axis400), lowerCI400-2, "%.2f" % lowerCI400, fontsize=7)
+  plt.text(max(x_axis400), upperCI400+2, "%.2f" % upperCI400, fontsize=7)
   filename = "%s_%s_BMD%d_BA.png" % (scanToName[index1], scanToName[index2], 400)
   plt.savefig(os.path.join(directory, filename))
   plt.clf()
@@ -116,12 +118,13 @@ def plot(comb: tuple, directory: str) -> None:
   plt.xlabel("Mean (%s and %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylabel("Error (%s - %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylim(-70,70)
-  plt.plot(df["mean800"], df["difference800"], 'o',
-    x_axis800, np.full(individualN, meanDiff800), '-',
-    x_axis800, np.full(individualN, lowerCI800), '--',
-    x_axis800, np.full(individualN, upperCI800), '--',
-    color='orange', markersize=4
-  )
+  plt.plot(df["mean800"], df["difference800"], 'o', color='orange', markersize=4)
+  plt.plot(x_axis800, np.full(individualN, meanDiff800), 'k-',)
+  plt.plot(x_axis800, np.full(individualN, lowerCI800), 'k--', x_axis800, np.full(individualN, upperCI800), 'k--')
+  plt.plot(x_axis800, np.full(individualN, 0), '-', color='grey')
+  plt.text(max(x_axis800), meanDiff800, "$\overline{x} = %.2f$" % meanDiff800, fontsize=7)
+  plt.text(max(x_axis800), lowerCI800-2, "%.2f" % lowerCI800, fontsize=7)
+  plt.text(max(x_axis800), upperCI800+2, "%.2f" % upperCI800, fontsize=7)
   filename = "%s_%s_BMD%d_BA.png" % (scanToName[index1], scanToName[index2], 800)
   plt.savefig(os.path.join(directory, filename))
   plt.clf()

@@ -48,18 +48,11 @@ def plot(comb: tuple, directory: str) -> None:
   secondProfile400 = secondProfile400[1:minLength]
   secondProfile800 = secondProfile800[1:minLength]
 
-  model100 = poly.polyfit(firstProfile100, secondProfile100, 1)
-  model400 = poly.polyfit(firstProfile400, secondProfile400, 1)
-  model800 = poly.polyfit(firstProfile800, secondProfile800, 1)
-
   xProfile = np.concatenate((firstProfile100, firstProfile400, firstProfile800))
   yProfile = np.concatenate((secondProfile100, secondProfile400, secondProfile800))
   model = poly.polyfit(xProfile, yProfile, 1)
 
   x_axis = np.arange(min(xProfile), max(xProfile), 0.5)
-  x_axis100 = np.arange(min(firstProfile100), max(firstProfile100), 0.1)
-  x_axis400 = np.arange(min(firstProfile400), max(firstProfile400), 0.1)
-  x_axis800 = np.arange(min(firstProfile800), max(firstProfile800), 0.1)
 
   plt.title("%s vs. %s" % (scanToName[index1], scanToName[index2]))
   plt.xlabel("%s" % scanToName[index1])
@@ -75,6 +68,21 @@ def plot(comb: tuple, directory: str) -> None:
   )
 
   plt.plot(x_axis, poly.polyval(x_axis, model), 'k--')
+
+  # x_i = xProfile
+  # y_i = yProfile
+  # \hat{y}_i = a + bx
+  # \bar{y} = \frac{\sum_{i=1}^numCalibration y_i}{numCalibration}
+  # RSE = \sqrt{\frac{\sum_{i=1}^numCalibration (y_i-\hat{y}_i)}{df}}
+
+  y_hat = poly.polyval(xProfile, model)
+  y_bar = np.mean(yProfile)
+  rss = np.sum((yProfile - y_hat)**2)
+  tss = np.sum((yProfile - y_bar)**2)
+  R2 = 1 - rss/tss
+
+  plt.text(min(xProfile), max(yProfile), "$y = %.2f + %.2fx$" % (model[0], model[1]), fontsize=7)
+  plt.text(min(xProfile), max(yProfile) - 50, "$R^2 = %.4f$" % R2, fontsize=7)
 
   abline(0, 1, "grey", x_axis)
 
