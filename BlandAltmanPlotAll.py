@@ -57,12 +57,9 @@ def plot(comb: tuple, directory: str) -> None:
   df["difference400"] = firstProfile400 - secondProfile400
   df["difference800"] = firstProfile800 - secondProfile800
 
-  allMeans = np.concatenate((df["mean100"].to_numpy(),df["mean400"].to_numpy(),df["mean800"].to_numpy()))
   allDifferences = np.concatenate((df["difference100"].to_numpy(),df["difference400"].to_numpy(),df["difference800"].to_numpy()))
 
   differencesToWrite.append((allDifferences, "%s_%s" % (scanToName[index1], scanToName[index2])))
-
-  N = len(allMeans)
 
   meanDiff100 = np.mean(df["difference100"])
   meanDiff400 = np.mean(df["difference400"])
@@ -73,7 +70,6 @@ def plot(comb: tuple, directory: str) -> None:
   sd800 = np.std(df["difference800"], ddof=1)
 
   tStar = scipy.stats.t.ppf(0.975, df=n-1)
-  tStarAll = scipy.stats.t.ppf(0.975, df=N-1)
 
   individualN = 100
   x_axis100 = np.linspace(min(df["mean100"]), max(df["mean100"]), individualN)
@@ -88,46 +84,47 @@ def plot(comb: tuple, directory: str) -> None:
   lowerCI800 = meanDiff800 - tStar * sd800
   upperCI800 = meanDiff800 + tStar * sd800
 
-  meanDiff = np.mean(allDifferences)
-  sdDiff = np.std(allDifferences, ddof=1)
-  lowerCI = meanDiff - tStarAll * sdDiff
-  upperCI = meanDiff + tStarAll * sdDiff
-
-  # x_axis = np.arange(min(df["mean100"]), max(df["mean800"]), 0.5)
-  x_axis = np.linspace(min(df["mean100"]), max(df["mean800"]), N)
-
-  plt.title("%s vs. %s" % (scanToName[index1], scanToName[index2]))
+  plt.title("%s vs. %s - BMD %d" % (scanToName[index1], scanToName[index2], 100))
   plt.xlabel("Mean (%s and %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylabel("Error (%s - %s)" % (scanToName[index1], scanToName[index2]))
   plt.ylim(-70,70)
-
   plt.plot(df["mean100"], df["difference100"], 'o',
     x_axis100, np.full(individualN, meanDiff100), '-',
     x_axis100, np.full(individualN, lowerCI100), '--',
     x_axis100, np.full(individualN, upperCI100), '--',
-    color='cyan', markersize=1
+    color='cyan', markersize=4
   )
+  filename = "%s_%s_BMD%d_BA.png" % (scanToName[index1], scanToName[index2], 100)
+  plt.savefig(os.path.join(directory, filename))
+  plt.clf()
+
+  plt.title("%s vs. %s - BMD %d" % (scanToName[index1], scanToName[index2], 400))
+  plt.xlabel("Mean (%s and %s)" % (scanToName[index1], scanToName[index2]))
+  plt.ylabel("Error (%s - %s)" % (scanToName[index1], scanToName[index2]))
+  plt.ylim(-70,70)
   plt.plot(df["mean400"], df["difference400"], 'o',
     x_axis400, np.full(individualN, meanDiff400), '-',
     x_axis400, np.full(individualN, lowerCI400), '--',
     x_axis400, np.full(individualN, upperCI400), '--',
-    color='green', markersize=1
+    color='green', markersize=4
   )
+  filename = "%s_%s_BMD%d_BA.png" % (scanToName[index1], scanToName[index2], 400)
+  plt.savefig(os.path.join(directory, filename))
+  plt.clf()
+
+  plt.title("%s vs. %s - BMD %d" % (scanToName[index1], scanToName[index2], 800))
+  plt.xlabel("Mean (%s and %s)" % (scanToName[index1], scanToName[index2]))
+  plt.ylabel("Error (%s - %s)" % (scanToName[index1], scanToName[index2]))
+  plt.ylim(-70,70)
   plt.plot(df["mean800"], df["difference800"], 'o',
     x_axis800, np.full(individualN, meanDiff800), '-',
     x_axis800, np.full(individualN, lowerCI800), '--',
     x_axis800, np.full(individualN, upperCI800), '--',
-    color='orange', markersize=1
+    color='orange', markersize=4
   )
-
-  plt.plot(x_axis, np.full(N, meanDiff), 'k-')
-  plt.plot(x_axis, np.full(N, lowerCI), 'k--')
-  plt.plot(x_axis, np.full(N, upperCI), 'k--')
-
-  filename = "%s_%s_BA.png" % (scanToName[index1], scanToName[index2])
+  filename = "%s_%s_BMD%d_BA.png" % (scanToName[index1], scanToName[index2], 800)
   plt.savefig(os.path.join(directory, filename))
   plt.clf()
-  # plt.show()
 
 def main():
   if (len(sys.argv) != 2):

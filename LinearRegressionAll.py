@@ -84,7 +84,6 @@ def plot(comb: tuple, directory: str) -> None:
   filename = "%s_%s_reg.png" % (scanToName[index1], scanToName[index2])
   plt.savefig(os.path.join(directory, filename))
   plt.clf()
-  # plt.show()
 
 def main():
   if (len(sys.argv) != 2):
